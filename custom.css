@@ -1,0 +1,19 @@
+html, body, p {
+    font-size: 20pt !important;
+}
+
+table.dataframe {
+    font-size: 10pt;
+    background-color:white;
+    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    float: left;
+}
+
+table.dataframe th, table.dataframe td {
+    border-top: 1px solid #ddd;
+}
