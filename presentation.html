@@ -339,18 +339,13 @@
 <section>
 <section id="introdução" class="title-slide slide level1 center">
 <h1>Introdução</h1>
-<ol type="1">
-<li>Conjunto de dados</li>
-<li>Objetivo</li>
-<li>Metodologia</li>
-</ol>
+
 </section>
 <section id="conjunto-de-dados" class="slide level2">
 <h2>Conjunto de dados</h2>
 <ul>
 <li><a href="https://www.kaggle.com/datasets/barun2104/telecom-churn?resource=download">Customer Churn</a></li>
 <li>Telecomunicações</li>
-<li>Análise apenas no conjunto de treino</li>
 </ul>
 </section>
 <section id="objetivo" class="slide level2">
@@ -359,14 +354,6 @@
 <li>Entender o que leva um cliente a cancelar o serviço</li>
 <li>Segmentar o público para ações de marketing</li>
 <li>Criar um modelo de classificação de churn</li>
-</ul>
-</section>
-<section id="metodologia" class="slide level2">
-<h2>Metodologia</h2>
-<ul>
-<li>Interpretação: Regressão Logística</li>
-<li>Segmentação: Cluster Hierárquico</li>
-<li>Classificação: Gradient Boosting</li>
 </ul>
 </section></section>
 <section>
@@ -390,9 +377,9 @@
 </section>
 <section id="overview-dos-dados" class="slide level2">
 <h2>Overview dos dados</h2>
-<p>Como temos apenas variáveis numéricas, usamos o método <code>describe</code> para obter uma visão geral dos dados.</p>
+<p>Como temos apenas variáveis numéricas, usamos o método <code>describe</code> para obter uma visão das variáveis e suas características.</p>
 <div class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display" data-execution_count="118">
+<div class="cell-output cell-output-display" data-execution_count="317">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -428,45 +415,45 @@
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">count</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.0</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.00</td>
-<td>2666.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.0</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
+<td>3333.00</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">mean</td>
 <td>0.14</td>
-<td>100.69</td>
+<td>101.06</td>
 <td>0.9</td>
-<td>0.27</td>
-<td>0.80</td>
-<td>1.57</td>
-<td>179.60</td>
-<td>100.54</td>
-<td>56.08</td>
-<td>10.04</td>
+<td>0.28</td>
+<td>0.82</td>
+<td>1.56</td>
+<td>179.78</td>
+<td>100.44</td>
+<td>56.31</td>
+<td>10.05</td>
 <td>10.24</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">std</td>
 <td>0.35</td>
-<td>39.52</td>
+<td>39.82</td>
 <td>0.3</td>
 <td>0.45</td>
-<td>1.26</td>
-<td>1.34</td>
-<td>54.35</td>
-<td>19.89</td>
-<td>16.29</td>
-<td>2.53</td>
-<td>2.80</td>
+<td>1.27</td>
+<td>1.32</td>
+<td>54.47</td>
+<td>20.07</td>
+<td>16.43</td>
+<td>2.54</td>
+<td>2.79</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">min</td>
@@ -476,38 +463,38 @@
 <td>0.00</td>
 <td>0.00</td>
 <td>0.00</td>
-<td>2.60</td>
-<td>30.00</td>
-<td>15.70</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>14.00</td>
 <td>0.00</td>
 <td>0.00</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">25%</td>
 <td>0.00</td>
-<td>73.00</td>
+<td>74.00</td>
 <td>1.0</td>
 <td>0.00</td>
 <td>0.00</td>
 <td>1.00</td>
-<td>143.20</td>
-<td>88.00</td>
-<td>44.90</td>
-<td>8.29</td>
+<td>143.70</td>
+<td>87.00</td>
+<td>45.00</td>
+<td>8.33</td>
 <td>8.50</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">50%</td>
 <td>0.00</td>
-<td>100.00</td>
+<td>101.00</td>
 <td>1.0</td>
 <td>0.00</td>
 <td>0.00</td>
 <td>1.00</td>
-<td>179.20</td>
+<td>179.40</td>
 <td>101.00</td>
-<td>53.15</td>
-<td>10.04</td>
+<td>53.50</td>
+<td>10.07</td>
 <td>10.30</td>
 </tr>
 <tr class="odd">
@@ -516,13 +503,13 @@
 <td>127.00</td>
 <td>1.0</td>
 <td>1.00</td>
-<td>1.70</td>
+<td>1.78</td>
 <td>2.00</td>
-<td>216.28</td>
+<td>216.40</td>
 <td>114.00</td>
-<td>65.80</td>
-<td>11.74</td>
-<td>12.00</td>
+<td>66.20</td>
+<td>11.77</td>
+<td>12.10</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">max</td>
@@ -545,11 +532,122 @@
 </div>
 </div>
 </section>
+<section id="overview-dos-dados-1" class="slide level2">
+<h2>Overview dos dados</h2>
+<p>Em seguida, dividimos os dados em churn e não churn para visualizar a diferença nas médias das variáveis.</p>
+<div class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-5-output-1.png" width="1146" height="446"></p>
+</div>
+</div>
+</section>
 <section id="variáveis-binárias" class="slide level2">
 <h2>Variáveis binárias</h2>
-<p>Ocorrência separada por churn</p>
-<div class="cell" data-execution_count="4">
-<div class="cell-output cell-output-display" data-execution_count="119">
+<div class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-6-output-1.png" width="758" height="359"></p>
+</div>
+</div>
+</section>
+<section id="variáveis-discretas" class="slide level2">
+<h2>Variáveis discretas</h2>
+<div class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-7-output-1.png" width="912" height="357"></p>
+</div>
+</div>
+</section>
+<section id="variáveis-contínuas" class="slide level2">
+<h2>Variáveis contínuas</h2>
+<div class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-8-output-1.png" width="912" height="357"></p>
+</div>
+</div>
+</section></section>
+<section>
+<section id="o-que-causa-o-churn" class="title-slide slide level1 center">
+<h1>O que causa o churn?</h1>
+<ol type="1">
+<li>Análises individuais</li>
+<li>Regressão Logística</li>
+</ol>
+</section>
+<section id="tempo-de-conta" class="slide level2">
+<h2>Tempo de conta</h2>
+<div class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-9-output-1.png" width="961" height="356"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="9">
+<div class="cell-output cell-output-stdout">
+<pre><code>t-statistic: -0.95
+p-value: 0.34</code></pre>
+</div>
+</div>
+</section>
+<section id="plano-de-dados" class="slide level2">
+<h2>Plano de dados</h2>
+<div class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-11-output-1.png" width="969" height="356"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="11">
+<div class="cell-output cell-output-stdout">
+<pre><code>chi2: 34.13
+p-value: 0.00</code></pre>
+</div>
+</div>
+</section>
+<section id="análise-mari-3" class="slide level2">
+<h2>Análise Mari 3</h2>
+</section>
+<section id="análise-mari-4" class="slide level2">
+<h2>Análise Mari 4</h2>
+</section></section>
+<section>
+<section id="regressão-logística" class="title-slide slide level1 center">
+<h1>Regressão Logística</h1>
+
+</section>
+<section id="tratamento-da-multicolinearidade" class="slide level2">
+<h2>Tratamento da multicolinearidade</h2>
+<ul>
+<li>Numérica x Numérica: Pearson</li>
+<li>Numérica x Categórica: Teste T Independente</li>
+<li>Categórica x Categórica: Qui-quadrado</li>
+</ul>
+</section>
+<section id="visualização-de-variáveis-correlacionadas" class="slide level2">
+<h2>Visualização de variáveis correlacionadas</h2>
+<div class="cell" data-execution_count="18">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-19-output-1.png" width="959" height="374"></p>
+</div>
+</div>
+</section>
+<section id="visualização-de-variáveis-correlacionadas-1" class="slide level2">
+<h2>Visualização de variáveis correlacionadas</h2>
+<div class="cell" data-execution_count="19">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-20-output-1.png" width="978" height="357"></p>
+</div>
+</div>
+</section>
+<section id="visualização-de-variáveis-correlacionadas-2" class="slide level2">
+<h2>Visualização de variáveis correlacionadas</h2>
+<div class="cell" data-execution_count="20">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-21-output-1.png" width="502" height="356"></p>
+</div>
+</div>
+</section>
+<section id="regressão-logística-1" class="slide level2">
+<h2>Regressão Logística</h2>
+<div class="cell" data-execution_count="21">
+<div class="cell-output cell-output-display" data-execution_count="330">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -569,25 +667,95 @@
 <thead>
 <tr class="header" style="text-align: right;">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">ContractRenewal</th>
-<th data-quarto-table-cell-role="th">DataPlan</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Churn</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">coef</th>
+<th data-quarto-table-cell-role="th">std err</th>
+<th data-quarto-table-cell-role="th">z</th>
+<th data-quarto-table-cell-role="th">P&gt;|z|</th>
+<th data-quarto-table-cell-role="th">[0.025</th>
+<th data-quarto-table-cell-role="th">0.975]</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>93.6%</td>
-<td>29.0%</td>
+<td data-quarto-table-cell-role="th">const</td>
+<td>-0.47</td>
+<td>0.13</td>
+<td>-3.69</td>
+<td>0.00</td>
+<td>-0.71</td>
+<td>-0.22</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>70.9%</td>
-<td>16.5%</td>
+<td data-quarto-table-cell-role="th">AccountWeeks</td>
+<td>0.03</td>
+<td>0.06</td>
+<td>0.48</td>
+<td>0.63</td>
+<td>-0.08</td>
+<td>0.13</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">ContractRenewal</td>
+<td>-1.99</td>
+<td>0.14</td>
+<td>-13.87</td>
+<td>0.00</td>
+<td>-2.27</td>
+<td>-1.71</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">DataUsage</td>
+<td>-0.39</td>
+<td>0.06</td>
+<td>-6.17</td>
+<td>0.00</td>
+<td>-0.51</td>
+<td>-0.26</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">CustServCalls</td>
+<td>0.66</td>
+<td>0.05</td>
+<td>12.97</td>
+<td>0.00</td>
+<td>0.56</td>
+<td>0.76</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">DayMins</td>
+<td>0.69</td>
+<td>0.06</td>
+<td>11.89</td>
+<td>0.00</td>
+<td>0.58</td>
+<td>0.81</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">DayCalls</td>
+<td>0.07</td>
+<td>0.06</td>
+<td>1.29</td>
+<td>0.20</td>
+<td>-0.04</td>
+<td>0.18</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">OverageFee</td>
+<td>0.35</td>
+<td>0.06</td>
+<td>6.13</td>
+<td>0.00</td>
+<td>0.24</td>
+<td>0.46</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">RoamMins</td>
+<td>0.27</td>
+<td>0.06</td>
+<td>4.79</td>
+<td>0.00</td>
+<td>0.16</td>
+<td>0.39</td>
 </tr>
 </tbody>
 </table>
@@ -596,225 +764,199 @@
 </div>
 </div>
 </section>
-<section id="variáveis-discretas" class="slide level2">
-<h2>Variáveis discretas</h2>
-<div class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display" data-execution_count="120">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead tr th {
-        text-align: left;
-    }
-
-    .dataframe thead tr:last-of-type th {
-        text-align: right;
-    }
-</style>
-
-<table class="dataframe" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">AccountWeeks</th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">DayCalls</th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">CustServCalls</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-</tr>
-<tr class="header">
-<th data-quarto-table-cell-role="th">Churn</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>100.38</td>
-<td>39.71</td>
-<td>100.55</td>
-<td>19.66</td>
-<td>1.46</td>
-<td>1.18</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>102.56</td>
-<td>38.37</td>
-<td>100.49</td>
-<td>21.21</td>
-<td>2.27</td>
-<td>1.91</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<p><img data-src="presentation_files/figure-revealjs/cell-7-output-1.png" width="959" height="357"></p>
-</div>
-</div>
-</section>
-<section id="variáveis-contínuas" class="slide level2">
-<h2>Variáveis contínuas</h2>
-<div class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display" data-execution_count="122">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead tr th {
-        text-align: left;
-    }
-
-    .dataframe thead tr:last-of-type th {
-        text-align: right;
-    }
-</style>
-
-<table class="dataframe" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">DataUsage</th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">DayMins</th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">RoamMins</th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">MonthlyCharge</th>
-<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">OverageFee</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">std</th>
-</tr>
-<tr class="header">
-<th data-quarto-table-cell-role="th">Churn</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>0.84</td>
-<td>1.27</td>
-<td>175.34</td>
-<td>50.14</td>
-<td>10.15</td>
-<td>2.79</td>
-<td>55.65</td>
-<td>16.24</td>
-<td>9.96</td>
-<td>2.51</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>0.54</td>
-<td>1.15</td>
-<td>205.09</td>
-<td>69.57</td>
-<td>10.75</td>
-<td>2.81</td>
-<td>58.68</td>
-<td>16.42</td>
-<td>10.52</td>
-<td>2.63</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display">
-<p><img data-src="presentation_files/figure-revealjs/cell-9-output-1.png" width="943" height="357"></p>
-</div>
-</div>
-</section></section>
-<section>
-<section id="o-que-causa-o-churn" class="title-slide slide level1 center">
-<h1>O que causa o churn?</h1>
-
-</section>
-<section id="regressão-logística" class="slide level2">
+<section id="regressão-logística-2" class="slide level2">
 <h2>Regressão Logística</h2>
+<div class="cell" data-execution_count="22">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-23-output-1.png" width="954" height="412"></p>
+</div>
+</div>
 </section>
-<section id="análise-dos-resultados" class="slide level2">
-<h2>Análise dos resultados</h2>
+<section id="limitações" class="slide level2">
+<h2>Limitações</h2>
+<ul>
+<li>Foto x Filme</li>
+<li>Relações não lineares</li>
+<li>Poucas variáveis</li>
+</ul>
 </section></section>
 <section>
-<section id="segmentação-dos-clientes" class="title-slide slide level1 center">
-<h1>Segmentação dos clientes</h1>
-
+<section id="segmentação" class="title-slide slide level1 center">
+<h1>Segmentação</h1>
+<ol type="1">
+<li>Redução de dimensionalidade
+<ul>
+<li>Desconsiderar Churn, DataPlan e MonthlyCharge</li>
+<li>Aplicar PCA</li>
+</ul></li>
+<li>Aplicar cluster hierárquico</li>
+</ol>
+</section>
+<section id="pca" class="slide level2">
+<h2>PCA</h2>
+<div class="cell" data-execution_count="23">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-24-output-1.png" width="758" height="374"></p>
+</div>
+</div>
 </section>
 <section id="cluster-hierárquico" class="slide level2">
 <h2>Cluster Hierárquico</h2>
+<div class="cell" data-execution_count="24">
+<div class="cell-output cell-output-display">
+<p><img data-src="presentation_files/figure-revealjs/cell-25-output-1.png" width="808" height="397"></p>
+</div>
+</div>
+<p>Variáveis desconsideradas: Churn, DataPlan e MonthlyCharge</p>
 </section>
 <section id="análise-dos-clusters" class="slide level2">
 <h2>Análise dos clusters</h2>
-</section></section>
-<section>
-<section id="modelo-de-classificação" class="title-slide slide level1 center">
-<h1>Modelo de classificação</h1>
+<div class="cell" data-execution_count="25">
+<div class="cell-output cell-output-display" data-execution_count="334">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-</section>
-<section id="gradient-boosting" class="slide level2">
-<h2>Gradient Boosting</h2>
-</section>
-<section id="análise-dos-resultados-1" class="slide level2">
-<h2>Análise dos resultados</h2>
-</section></section>
-<section id="considerações-finais" class="title-slide slide level1 center">
-<h1>Considerações finais</h1>
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">cluster</th>
+<th data-quarto-table-cell-role="th">AccountWeeks</th>
+<th data-quarto-table-cell-role="th">ContractRenewal</th>
+<th data-quarto-table-cell-role="th">DataUsage</th>
+<th data-quarto-table-cell-role="th">CustServCalls</th>
+<th data-quarto-table-cell-role="th">DayMins</th>
+<th data-quarto-table-cell-role="th">DayCalls</th>
+<th data-quarto-table-cell-role="th">OverageFee</th>
+<th data-quarto-table-cell-role="th">RoamMins</th>
+<th data-quarto-table-cell-role="th">DataPlan</th>
+<th data-quarto-table-cell-role="th">MonthlyCharge</th>
+<th data-quarto-table-cell-role="th">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0.00</td>
+<td>100.79</td>
+<td>0.93</td>
+<td>0.86</td>
+<td>1.45</td>
+<td>175.18</td>
+<td>100.28</td>
+<td>9.95</td>
+<td>10.16</td>
+<td>0.30</td>
+<td>55.82</td>
+<td>2850</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1.00</td>
+<td>103.46</td>
+<td>0.00</td>
+<td>0.87</td>
+<td>1.36</td>
+<td>183.83</td>
+<td>102.05</td>
+<td>10.00</td>
+<td>9.78</td>
+<td>0.30</td>
+<td>57.39</td>
+<td>186</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2.00</td>
+<td>101.71</td>
+<td>1.00</td>
+<td>2.91</td>
+<td>1.38</td>
+<td>185.99</td>
+<td>99.99</td>
+<td>10.02</td>
+<td>10.77</td>
+<td>1.00</td>
+<td>78.21</td>
+<td>675</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>3.00</td>
+<td>100.23</td>
+<td>1.00</td>
+<td>0.17</td>
+<td>1.48</td>
+<td>170.70</td>
+<td>100.22</td>
+<td>9.93</td>
+<td>9.99</td>
+<td>0.06</td>
+<td>48.07</td>
+<td>1989</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><strong>Cluster 1</strong></p>
+<ul>
+<li>Sem renovações recentes</li>
+<li>Baixo uso de dados</li>
+<li>Poucos clientes</li>
+</ul>
+<p><strong>Propenso a churn</strong></p>
+<ul>
+<li>Ação imediata</li>
+<li>Desconto ao adquirir plano de dados na renovação</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><strong>Cluster 2</strong></p>
+<ul>
+<li>Renovações recentes</li>
+<li>Alto uso de dados</li>
+<li>Altamente rentável</li>
+</ul>
+<p><strong>Cliente Seguro</strong></p>
+<ul>
+<li>Aguardar período de renovação</li>
+<li>Desconto ao indicar um conhecido</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><strong>Cluster 3</strong></p>
+<ul>
+<li>Renovações recentes</li>
+<li>Nenhum uso de dados</li>
+<li>Muitas ligações para o suporte</li>
+</ul>
+<p><strong>Cliente comum</strong></p>
+<ul>
+<li>Entender o motivo das ligações</li>
+<li>Aguardar período de renovação</li>
+<li>Desconto ao adquirir plano de dados</li>
+</ul>
+</div>
+</div>
 <div class="footer footer-default">
 <p>Insper – Marketing Analytics, set/23</p>
 </div>
-</section>
+</section></section>
     </div>
   </div>
 

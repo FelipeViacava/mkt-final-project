@@ -10,14 +10,22 @@ css: custom.css
 execute:
     python: env/bin/python
 ---
+
 ```{python}
 #| echo: false
+#| warning: false
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import seaborn as sns
 
-from scipy.stats import chi2_contingency
+from pca_viz import expl_var, biplot
+
+from scipy import stats
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -25,39 +33,27 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import PCA
 
 pd.set_option('display.precision', 2)
 ```
 
 ```{python}
 #| echo: false
+#| warning: false
 df = pd.read_csv("data/telecom_churn.csv")
-train, test = train_test_split(
-    df,
-    test_size=0.2,
-    random_state=42
-)
 ```
 
 # Introdução
-1. Conjunto de dados
-2. Objetivo
-3. Metodologia
 
 ## Conjunto de dados
 - [Customer Churn](https://www.kaggle.com/datasets/barun2104/telecom-churn?resource=download)
 - Telecomunicações
-- Análise apenas no conjunto de treino
 
 ## Objetivo
 - Entender o que leva um cliente a cancelar o serviço
 - Segmentar o público para ações de marketing
 - Criar um modelo de classificação de churn
-
-## Metodologia
-- Interpretação: Regressão Logística
-- Segmentação: Cluster Hierárquico
-- Classificação: Gradient Boosting
 
 # Conjunto de dados
 
@@ -87,74 +83,159 @@ train, test = train_test_split(
  
 ## Overview dos dados
 
-Como temos apenas variáveis numéricas, usamos o método `describe` para obter uma visão geral dos dados.
+Como temos apenas variáveis numéricas, usamos o método `describe` para obter uma visão das variáveis e suas características.
 ```{python}
 #| echo: false
-train.describe()
+#| warning: false
+df.describe()
+```
+
+## Overview dos dados
+
+Em seguida, dividimos os dados em churn e não churn para visualizar a diferença nas médias das variáveis.
+
+```{python}
+#| echo: false
+#| warning: false
+
+media_cols = [
+    col
+    for col in df.columns
+    if col != "Churn"
+]
+
+fig, ax = plt.subplots(1, len(media_cols), figsize=(12, 4), facecolor="none")
+fig.subplots_adjust(wspace=1)
+
+for i, col in enumerate(media_cols):
+    df.groupby("Churn")[col] \
+        .mean() \
+        .plot(
+            kind="bar",
+            ax=ax[i],
+            color=["blue", "red"],
+            alpha=.5
+        )
+    ax[i].set_xlabel("")
+    ax[i].set_xticks([])
+    ax[i].spines["top"].set_visible(False)
+    ax[i].spines["right"].set_visible(False)
+    ax[i].set_title(col, fontsize=10)
+    ax[i].set_facecolor("none")
+
+fig.tight_layout()
+blue_patch = mpatches.Patch(color='blue', alpha=0.5, label='0')
+red_patch = mpatches.Patch(color='red', alpha=0.5, label='1')
+fig.legend(
+    handles=[blue_patch, red_patch],
+    loc='upper center',
+    bbox_to_anchor=(0.5, -0.02),
+    title="Churn",
+    ncol=2,
+    facecolor="none"
+)
+fig.show()
 ```
 
 ## Variáveis binárias
 
-Ocorrência separada por churn
-
 ```{python}
 #| echo: false
+#| warning: false
 binary = ["ContractRenewal", "DataPlan"]
-train \
-    .groupby("Churn")[binary] \
-    .mean() \
-    .map(lambda x: f"{x:.1%}")
+
+contract_renewal_counts = df.groupby(['ContractRenewal', 'Churn']).size().unstack()
+data_plan_counts = df.groupby(['DataPlan', 'Churn']).size().unstack()
+
+fig, ax = plt.subplots(1, 2, figsize=(8, 4), facecolor="none")
+
+contract_renewal_counts.plot(
+    kind='bar',
+    color=['blue', 'red'],
+    alpha=.5,
+    ax=ax[0],
+    legend=False
+)
+ax[0].set_title('ContractRenewal')
+ax[0].set_xlabel('')
+ax[0].set_ylabel('Count')
+ax[0].set_xticklabels([0, 1], rotation=0)
+ax[0].set_facecolor("none")
+ax[0].spines["top"].set_visible(False)
+ax[0].spines["right"].set_visible(False)
+
+data_plan_counts.plot(
+    kind='bar',
+    color=['blue', 'red'],
+    alpha=.5,
+    ax=ax[1],
+    legend=False
+)
+
+ax[1].set_title('DataPlan')
+ax[1].set_xlabel('')
+ax[1].set_ylabel('')
+ax[1].set_xticklabels([0, 1], rotation=0)
+ax[1].set_facecolor("none")
+ax[1].spines["top"].set_visible(False)
+ax[1].spines["right"].set_visible(False)
+
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.show()
 ```
 
 ## Variáveis discretas
 
 ```{python}
+#| echo: false
+#| warning: false
+
 discrete = [
     "AccountWeeks",
     "DayCalls",
     "CustServCalls"
 ]
-train \
-    .groupby("Churn")[discrete] \
-    .agg(["mean", "std"])
-```
 
-```{python}
-#| echo: false
 fig, ax = plt.subplots(1, 3, figsize=(12, 4))
 fig.subplots_adjust(wspace=0.35)
 
 for i, col in enumerate(discrete):
-    train[train["Churn"]==0][col] \
+    df[df["Churn"]==0][col] \
         .plot(
             kind="hist",
             density=True,
             ax=ax[i],
             color="blue",
-            legend=(col=="CustServCalls"),
+            legend=False,
             alpha=.5,
             bins=(5 if col=="CustServCalls" else 15)
         )
-    train[train["Churn"]==1][col] \
+    df[df["Churn"]==1][col] \
         .plot(
             kind="hist",
             density=True,
             ax=ax[i],
             color="red",
-            legend=(col=="CustServCalls"),
+            legend=False,
             alpha=.5,
             bins=(5 if col=="CustServCalls" else 15)
         )
     ax[i].set_title(col)
     ax[i].set_xlabel("")
     ax[i].set_ylabel("")
-    ax[i].legend(["Manteve", "Deixou"] if col=="CustServCalls" else "")
+    ax[i].set_facecolor("none")
+    ax[i].spines["top"].set_visible(False)
+    ax[i].spines["right"].set_visible(False)
+    ax[i].set_yticks([])
+
+fig.set_facecolor("none")
 ```
 
 ## Variáveis contínuas
 
 ```{python}
 #| echo: false
+#| warning: false
 
 continuous = [
     "DataUsage",
@@ -163,61 +244,531 @@ continuous = [
     "MonthlyCharge",
     "OverageFee"
 ]
-
-train \
-    .groupby("Churn")[continuous] \
-    .agg(["mean", "std"])
-```
-
-```{python}
-#| echo: false
-
 fig, ax = plt.subplots(1, 5, figsize=(12, 4))
 fig.subplots_adjust(wspace=.4)
 
 for i, col in enumerate(continuous):
-    train[train["Churn"]==0][col] \
+    df[df["Churn"]==0][col] \
         .plot(
             kind="hist",
             density=True,
             ax=ax[i],
             color="blue",
-            legend=(col=="DataUsage"),
+            legend=False,
             alpha=.5,
             bins=(15 if col=="DataUsage" else 15)
         )
-    train[train["Churn"]==1][col] \
+    df[df["Churn"]==1][col] \
         .plot(
             kind="hist",
             density=True,
             ax=ax[i],
             color="red",
-            legend=(col=="DataUsage"),
+            legend=False,
             alpha=.5,
             bins=(15 if col=="DataUsage" else 15)
         )
     ax[i].set_title(col)
     ax[i].set_xlabel("")
     ax[i].set_ylabel("")
-    ax[i].legend(["Manteve", "Deixou"] if col=="DataUsage" else "")
+    ax[i].set_facecolor("none")
+    ax[i].set_yticks([])
+    ax[i].spines["top"].set_visible(False)
+    ax[i].spines["right"].set_visible(False)
+fig.set_facecolor("none")
 ```
 
 # O que causa o churn?
 
+1. Análises individuais
+2. Regressão Logística
+
+## Tempo de conta
+
+```{python}
+# plot
+fig, ax = plt.subplots(1, figsize=(12, 4), facecolor='none')
+week_churn = df \
+    [["AccountWeeks", "Churn"]] \
+    .groupby("AccountWeeks") \
+    .mean() \
+    .reset_index()
+ax.plot(
+    week_churn["AccountWeeks"],
+    week_churn["Churn"],
+    'o',
+    color="pink",
+    alpha=.8
+)
+ax.set_ylabel("Churn")
+ax.set_xlabel("AccountWeeks")
+ax.set_facecolor("none")
+fig.set_facecolor("none")
+fig.show()
+```
+
+```{python}	
+# t test
+group1 = df[df["Churn"]==0]["AccountWeeks"]
+group2 = df[df["Churn"]==1]["AccountWeeks"]
+t_stat, p_value = stats.ttest_ind(group1, group2)
+print(f"t-statistic: {t_stat:.2f}")
+print(f"p-value: {p_value:.2f}")
+```
+
+## Plano de dados
+
+```{python}
+# plot
+fig, ax = plt.subplots(1, figsize=(12, 4), facecolor='none')
+plan_churn = df \
+    [["DataPlan", "Churn"]] \
+    .groupby("DataPlan") \
+    .mean() \
+    .reset_index()
+ax.bar(
+    plan_churn["DataPlan"],
+    plan_churn["Churn"],
+    color="pink",
+    alpha=.8
+)
+ax.set_ylabel("Churn")
+ax.set_xlabel("DataPlan")
+ax.set_facecolor("none")
+fig.set_facecolor("none")
+fig.show()
+```
+
+```{python}
+# chi2 test
+contingency_table = pd.crosstab(df["DataPlan"], df["Churn"])
+chi2, p_value, _, _ = stats.chi2_contingency(contingency_table)
+print(f"chi2: {chi2:.2f}")
+print(f"p-value: {p_value:.2f}")
+```
+
+## Análise Mari 3
+
+## Análise Mari 4
+
+# Regressão Logística
+
+## Tratamento da multicolinearidade
+
+- Numérica x Numérica: Pearson
+- Numérica x Categórica: Teste T Independente
+- Categórica x Categórica: Qui-quadrado
+
+```{python}
+#| echo: false
+#| warning: false
+numerical = discrete + continuous
+categorical = binary
+scaled = df.copy()
+
+scaled["CustServCalls"] = scaled["CustServCalls"].apply(np.log1p)
+
+ss = StandardScaler()
+scaled[numerical] = ss.fit_transform(df[numerical])
+
+def color(val):
+    color = 'red' if val == 1 else 'black'
+    return f'color: {color}'
+```
+
+```{python}
+#| echo: false
+#| eval: false
+results_spearman = pd.DataFrame()
+for num1 in numerical:
+    for num2 in numerical:
+        correlation, p_value = stats \
+            .pearsonr(scaled[num1], scaled[num2])
+        results_spearman.loc[num1, num2] = p_value
+results_spearman.map(lambda x: f"{x:.2f}")
+```
+
+```{python}
+#| echo: false
+#| eval: false
+(
+    results_spearman \
+        .map(lambda p_value: 1 if p_value < .05 else 0) \
+        .sum()
+    - 1
+) \
+    .sort_values(ascending=False) \
+    .reset_index() \
+    .rename(
+        mapper={
+            "index": "Variável",
+            0: "N de correlações significativas"
+        },
+        axis=1
+    ) \
+    .set_index("Variável")
+```
+
+```{python}
+#| echo: false
+#| eval: false
+results_t = pd.DataFrame(index=numerical, columns=categorical)
+for cat_var in categorical:
+    for num_var in numerical:
+        group1 = df[df[cat_var] == 0][num_var]
+        group2 = df[df[cat_var] == 1][num_var]
+        t_stat, p_value = stats.ttest_ind(group1, group2)
+        results_t.loc[num_var, cat_var] = p_value
+
+results_t.map(lambda x: f"{x:.2f}")
+```
+
+```{python}
+#| echo: false
+#| eval: false
+(
+    results_t \
+    .map(lambda p_value: 1 if p_value < .025 else 0) \
+    .sum()
+) \
+    .sort_values(ascending=False) \
+    .reset_index() \
+    .rename(
+        mapper={
+            "index": "Variável",
+            0: "N de correlações significativas"
+        },
+        axis=1
+    ) \
+    .set_index("Variável")
+```
+
+```{python}
+#| echo: false
+#| eval: false
+results_chi2 = pd.DataFrame()
+for cat1 in categorical:
+    for cat2 in categorical:
+        contingency_table = pd.crosstab(
+            scaled[cat1],
+            scaled[cat2]
+        )
+        chi2, p_value, _, _ = stats \
+            .chi2_contingency(contingency_table)
+        results_chi2.loc[cat1, cat2] = p_value
+results_chi2.map(lambda x: f"{x:.2f}")
+```
+
+## Visualização de variáveis correlacionadas
+
+```{python}
+#| echo: false
+#| warning: false
+
+correlated = ["DataUsage", "DayMins", "OverageFee", "RoamMins"]
+fig, ax = plt.subplots(1, 4, figsize=(12, 4), facecolor="none")
+fig.subplots_adjust(wspace=.4)
+for i, col in enumerate(correlated):
+    correlation, p_value = stats \
+            .pearsonr(scaled[col], scaled["MonthlyCharge"])
+    scaled \
+        .plot(
+            kind="scatter",
+            x=correlated[i],
+            y="MonthlyCharge",
+            ax=ax[i],
+            color="pink",
+            alpha=.5
+        )
+    ax[i].set_facecolor("none")
+    ax[i].spines["top"].set_visible(False)
+    ax[i].spines["right"].set_visible(False)
+    ax[i].set_ylabel("MonthlyCharge" if i==0 else "")
+    if i!=0:
+        ax[i].set_yticks([])
+    ax[i].set_title(f"Correlação: {correlation:.2f}", fontsize=10)
+```
+
+## Visualização de variáveis correlacionadas
+
+```{python}
+#| echo: false
+#| warning: false
+
+correlated = [
+    "DayMins",
+    "RoamMins",
+    "MonthlyCharge"
+]
+
+fig, ax = plt.subplots(1, 3, figsize=(12, 4), facecolor="none")
+fig.subplots_adjust(wspace=.4)
+
+for i, col in enumerate(correlated):
+    df[df["ContractRenewal"]==0][col] \
+        .plot(
+            kind="hist",
+            density=True,
+            ax=ax[i],
+            color="green",
+            legend=(col=="MonthlyCharge"),
+            alpha=.5,
+            bins=(15 if col=="MonthlyCharge" else 15)
+        )
+    df[df["ContractRenewal"]==1][col] \
+        .plot(
+            kind="hist",
+            density=True,
+            ax=ax[i],
+            color="purple",
+            legend=(col=="MonthlyCharge"),
+            alpha=.5,
+            bins=(15 if col=="MonthlyCharge" else 15)
+        )
+    ax[i].set_title(col)
+    ax[i].set_xlabel("")
+    ax[i].set_ylabel("MonthlyCharge" if i==0 else "")
+    ax[i].set_facecolor("none")
+    ax[i].spines["top"].set_visible(False)
+    ax[i].spines["right"].set_visible(False)
+    if col=="MonthlyCharge":
+        ax[i].legend([0, 1], title="ContractRenewal", facecolor="none")
+
+```
+
+## Visualização de variáveis correlacionadas
+
+```{python}
+#| echo: false
+#| warning: false
+
+fig, ax = plt.subplots(1, 1, figsize=(6, 4), facecolor="none")
+ax.set_facecolor("none")
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+scaled[scaled["DataPlan"]==0] \
+    .plot(
+        kind="scatter",
+        x="RoamMins",
+        y="DataUsage",
+        color="orange",
+        alpha=.5,
+        ax=ax
+    )
+scaled[scaled["DataPlan"]==1] \
+    .plot(
+        kind="scatter",
+        x="RoamMins",
+        y="DataUsage",
+        color="black",
+        alpha=.5,
+        ax=ax
+    )
+
+ax.legend([0, 1], title="DataPlan", facecolor="none")
+fig.show()
+```
+
 ## Regressão Logística
 
-## Análise dos resultados
+```{python}
+#| echo: false
+#| warning: false
 
-# Segmentação dos clientes
+target = "Churn"
+features = [
+    col
+    for col in scaled.columns
+    if col not in [
+        target,
+        "MonthlyCharge",
+        "DataPlan"
+    ]
+]
+X = sm.add_constant(scaled[features])
+y = scaled[target]
+model = sm.Logit(y, X)
+result = model.fit(disp=0)
+
+summary_df = pd.DataFrame({
+    'coef': result.params.values,
+    'std err': result.bse.values,
+    'z': result.tvalues.values,
+    'P>|z|': result.pvalues.values,
+    '[0.025': result.conf_int()[0].values,
+    '0.975]': result.conf_int()[1].values,
+}, index=result.params.index)
+
+summary_df.map(lambda x: f"{x:.2f}")
+```
+
+## Regressão Logística
+
+```{python}
+#| echo: false
+#| warning: false
+
+fig = plt.figure(figsize=(12, 4), facecolor='none')
+plt.bar(features, result.params[1:], color="pink", alpha=.5)
+plt.axhline(0, color="black", linewidth=1, linestyle="--")
+plt.gca().spines["top"].set_visible(False)
+plt.gca().spines["right"].set_visible(False)
+plt.gca().set_facecolor('none')
+plt.title("Parameter Estimates")
+plt.xlabel('')
+plt.ylabel('')
+plt.xticks(rotation=30)
+plt.show()
+```
+
+## Limitações
+
+- Foto x Filme
+- Relações não lineares
+- Poucas variáveis
+
+# Segmentação
+
+1. Redução de dimensionalidade
+    - Desconsiderar Churn, DataPlan e MonthlyCharge
+    - Aplicar PCA
+2. Aplicar cluster hierárquico
+
+## PCA
+
+```{python}
+#| echo: false
+#| warning: false
+ignore = ["Churn", "DataPlan", "MonthlyCharge"] 
+pca_df = df.drop(ignore, axis=1)
+pca_df["CustServCalls"] = pca_df["CustServCalls"] \
+    .apply(np.log1p)
+ss2 = StandardScaler()
+ss2 = ss2.fit(pca_df)
+pca_df = pd.DataFrame(
+    ss2.transform(pca_df),
+    columns=pca_df.columns
+)
+
+pca = PCA()
+pca = pca.fit(pca_df)
+
+expl_var(pca.explained_variance_ratio_)
+```
 
 ## Cluster Hierárquico
 
+```{python}
+#| echo: false
+#| warning: false
+
+ignore = ["Churn", "DataPlan", "MonthlyCharge"] 
+cluster_df = df[df["Churn"]==0].drop(ignore, axis=1)
+
+cluster_df["CustServCalls"] = cluster_df["CustServCalls"] \
+    .apply(np.log1p)
+ss2 = StandardScaler()
+ss2 = ss2.fit(cluster_df)
+cluster_df = pd.DataFrame(
+    ss2.transform(cluster_df),
+    columns=cluster_df.columns
+)
+
+linked = linkage(
+    cluster_df,
+    metric='euclidean',
+    method='ward'
+)
+
+plt.figure(figsize=(10, 5), facecolor='none')
+dendrogram(linked)
+plt.gca().set_facecolor('none')
+plt.xlabel('')
+plt.ylabel('Distância Euclidiana')
+plt.xticks([])
+plt.show()
+```
+
+Variáveis desconsideradas: Churn, DataPlan e MonthlyCharge
+
 ## Análise dos clusters
 
-# Modelo de classificação
+```{python}
+#| echo: false
+#| warning: false
 
-## Gradient Boosting
+clustered = df[df["Churn"]==0]
+clustered["cluster"] = fcluster(linked, 3, criterion='maxclust')
 
-## Análise dos resultados
+clustered = clustered[
+    [col for col in clustered.columns if col not in ignore]
+    + ["DataPlan", "MonthlyCharge"]
+]
 
-# Considerações finais
+sem_churn = df[df["Churn"]==0]
+sem_churn["cluster"] = 0
+sem_churn = sem_churn[
+    [col for col in sem_churn.columns if col not in ignore]
+    + ["DataPlan", "MonthlyCharge"]
+]
+
+compare = pd.concat([sem_churn, clustered], axis=0)
+
+counts = compare \
+    .groupby("cluster") \
+    .size() \
+    .sort_index() \
+    .to_list()
+
+compare \
+    .groupby("cluster") \
+    .mean() \
+    .sort_index() \
+    .reset_index() \
+    .map(lambda x: f"{x:.2f}") \
+    .assign(n=counts)
+```
+
+:::: {.columns}
+
+::: {.column width="33%"}
+**Cluster 1**
+
+- Sem renovações recentes
+- Baixo uso de dados
+- Poucos clientes
+
+**Propenso a churn**
+
+- Ação imediata
+- Desconto ao adquirir plano de dados na renovação
+:::
+
+::: {.column width="33%"}
+**Cluster 2**
+
+- Renovações recentes
+- Alto uso de dados
+- Altamente rentável
+
+**Cliente Seguro**
+
+- Aguardar período de renovação
+- Desconto ao indicar um conhecido
+:::
+
+::: {.column width="33%"}
+**Cluster 3**
+
+- Renovações recentes
+- Nenhum uso de dados
+- Muitas ligações para o suporte
+
+**Cliente comum**
+
+- Entender o motivo das ligações
+- Aguardar período de renovação
+- Desconto ao adquirir plano de dados
+:::
+
+::::

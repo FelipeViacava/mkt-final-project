@@ -1,11 +1,15 @@
 html, body, p {
-    font-size: 20pt !important;
+    font-size: 20pt;
+}
+
+li {
+    font-size: 15pt !important;
 }
 
 table.dataframe {
     font-size: 10pt;
     background-color:white;
-    margin-top: 20px;
+    margin-top: 10px;
     border-collapse: separate;
     border-spacing: 0;
     border: 1px solid #ddd;
