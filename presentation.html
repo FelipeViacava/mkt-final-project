@@ -337,9 +337,16 @@
 
 </section>
 <section>
-<section id="introdução" class="title-slide slide level1 center">
-<h1>Introdução</h1>
+<section id="telecom-customer-churn" class="title-slide slide level1 center">
+<h1>Telecom Customer Churn</h1>
 
+</section>
+<section id="objetivo" class="slide level2">
+<h2>Objetivo</h2>
+<ul>
+<li>Entender o que leva um cliente a cancelar o serviço</li>
+<li>Segmentar o público para ações de marketing</li>
+</ul>
 </section>
 <section id="conjunto-de-dados" class="slide level2">
 <h2>Conjunto de dados</h2>
@@ -347,19 +354,6 @@
 <li><a href="https://www.kaggle.com/datasets/barun2104/telecom-churn?resource=download">Customer Churn</a></li>
 <li>Telecomunicações</li>
 </ul>
-</section>
-<section id="objetivo" class="slide level2">
-<h2>Objetivo</h2>
-<ul>
-<li>Entender o que leva um cliente a cancelar o serviço</li>
-<li>Segmentar o público para ações de marketing</li>
-<li>Criar um modelo de classificação de churn</li>
-</ul>
-</section></section>
-<section>
-<section id="conjunto-de-dados-1" class="title-slide slide level1 center">
-<h1>Conjunto de dados</h1>
-
 </section>
 <section id="variáveis" class="slide level2">
 <h2>Variáveis</h2>
@@ -379,7 +373,7 @@
 <h2>Overview dos dados</h2>
 <p>Como temos apenas variáveis numéricas, usamos o método <code>describe</code> para obter uma visão das variáveis e suas características.</p>
 <div class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display" data-execution_count="255">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -610,7 +604,8 @@ p-value: 0.00</code></pre>
 </div>
 <div class="cell" data-execution_count="13">
 <div class="cell-output cell-output-stdout">
-<pre><code>chi2: 41.90</code></pre>
+<pre><code>chi2: 41.90
+p_value: 0.00</code></pre>
 </div>
 </div>
 </section>
@@ -668,7 +663,7 @@ p-value: 0.00</code></pre>
 <section id="regressão-logística-1" class="slide level2">
 <h2>Regressão Logística</h2>
 <div class="cell" data-execution_count="25">
-<div class="cell-output cell-output-display" data-execution_count="272">
+<div class="cell-output cell-output-display" data-execution_count="20">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -833,7 +828,7 @@ p-value: 0.00</code></pre>
 <section id="análise-dos-clusters" class="slide level2">
 <h2>Análise dos clusters</h2>
 <div class="cell" data-execution_count="29">
-<div class="cell-output cell-output-display" data-execution_count="276">
+<div class="cell-output cell-output-display" data-execution_count="24">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {

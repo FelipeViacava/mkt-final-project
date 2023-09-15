@@ -44,18 +44,15 @@ pd.set_option('display.precision', 2)
 df = pd.read_csv("data/telecom_churn.csv")
 ```
 
-# Introdução
-
-## Conjunto de dados
-- [Customer Churn](https://www.kaggle.com/datasets/barun2104/telecom-churn?resource=download)
-- Telecomunicações
+# Telecom Customer Churn
 
 ## Objetivo
 - Entender o que leva um cliente a cancelar o serviço
 - Segmentar o público para ações de marketing
-- Criar um modelo de classificação de churn
 
-# Conjunto de dados
+## Conjunto de dados
+- [Customer Churn](https://www.kaggle.com/datasets/barun2104/telecom-churn?resource=download)
+- Telecomunicações
 
 ## Variáveis
 
@@ -410,6 +407,7 @@ fig.show()
 contingency_table = pd.crosstab(df2["Condition"], df2["Churn"])
 chi2, p_value, _, _ = stats.chi2_contingency(contingency_table)
 print(f"chi2: {chi2:.2f}")
+print(f"p_value: {p_value:.2f}")
 ```
 
 ## Ligações para o suporte
@@ -627,7 +625,6 @@ for i, col in enumerate(correlated):
     ax[i].spines["right"].set_visible(False)
     if col=="MonthlyCharge":
         ax[i].legend([0, 1], title="ContractRenewal", facecolor="none")
-
 ```
 
 ## Visualização de variáveis correlacionadas
