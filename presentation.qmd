@@ -347,9 +347,103 @@ print(f"chi2: {chi2:.2f}")
 print(f"p-value: {p_value:.2f}")
 ```
 
-## Análise Mari 3
+## Uso de dados com e sem plano
 
-## Análise Mari 4
+```{python}
+df2 = df \
+    .assign(
+        Condition=(
+            lambda ldf:
+            (
+                ldf["DataPlan"] \
+                    .apply(
+                        lambda lr:
+                        "Usa dados"
+                        if (lr==1)
+                        else "Não usa dados"
+                    )
+                + ldf["DataUsage"] \
+                    .apply(
+                        lambda lr:
+                        ", tem plano"
+                        if (lr>0)
+                        else ", não tem plano"
+                    )
+            )
+        )
+    ) \
+    [["Condition", "Churn"]]
+
+cond_df = df2 \
+    .groupby("Condition") \
+    .agg(["mean", "count"]) \
+    .reset_index()
+
+colors = {
+    "Usa dados, tem plano": "red",
+    "Usa dados, não tem plano": "blue",
+    "Não usa dados, tem plano": "green",
+    "Não usa dados, não tem plano": "purple"
+}
+
+fig, ax = plt.subplots(1, figsize=(4, 4), facecolor='none')
+for cat, color in colors.items():
+    filtered = cond_df[cond_df["Condition"]==cat]
+    ax.scatter(
+        filtered[("Churn", "count")],
+        filtered[("Churn", "mean")],
+        color=color
+    )
+
+ax.set_facecolor("none")
+ax.legend(
+    colors.keys(),
+    facecolor="none",
+    bbox_to_anchor=(2, 0.7)
+)
+fig.show()
+```
+
+```{python}
+# Chi2 condition x churn
+
+contingency_table = pd.crosstab(df2["Condition"], df2["Churn"])
+chi2, p_value, _, _ = stats.chi2_contingency(contingency_table)
+print(f"chi2: {chi2:.2f}")
+```
+
+## Ligações para o suporte
+
+```{python}
+grouped = df.groupby("CustServCalls")["Churn"] \
+    .mean() \
+    .reset_index()
+
+fig, ax = plt.subplots(1, figsize=(8, 4), facecolor='none')
+
+ax.bar(
+    x=grouped["CustServCalls"],
+    height=grouped["Churn"],
+    color="pink",
+    alpha=.8
+)
+ax.set_facecolor("none")
+ax.set_xlabel("CustServCalls")
+ax.set_ylabel("Churn")
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+fig.set_facecolor("none")
+fig.show()
+```
+
+```{python}
+# t test CustServCalls x Churn
+group1 = df[df["Churn"]==0]["CustServCalls"]
+group2 = df[df["Churn"]==1]["CustServCalls"]
+t_stat, p_value = stats.ttest_ind(group1, group2)
+print(f"t-statistic: {t_stat:.2f}")
+print(f"p-value: {p_value:.2f}")
+```
 
 # Regressão Logística
 
